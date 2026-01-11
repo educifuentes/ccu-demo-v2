@@ -229,6 +229,9 @@ def build_activos_trimestres(censos_df: pd.DataFrame,
     activos_trimestrales = pd.DataFrame(rows)
     return activos_trimestrales
 
+# def create_revision_cumplimiento(activos_df):
+    # si esta en riesgo de no cumplir, definir cumplimeinto
+
 
 def process_activos(censos_df, nominas_df):
     """Builds and processes the activos dataframe tracking totals of salidas and schoperas by local_id and periodo"""
