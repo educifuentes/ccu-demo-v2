@@ -10,6 +10,7 @@ except FileNotFoundError as e:
 
 
 st.title("Locales")
+st.markdown("Informacion de censos y nominas de cada local por periodo")
 
 local_ids = sorted(activos_df['local_id'].unique())
 # Map local_id to razon_social for display
@@ -46,18 +47,29 @@ with col2:
 
 # -----------------------------------------------------------------------------
 
-st.subheader("Informacion")
-
-
-st.dataframe(locales_df[locales_df['id'] == selected_local_id])
+st.subheader("Ficha del Local")
 
 local_info = locales_df[locales_df['id'] == selected_local_id].iloc[0]
 
-multi = f'''
-- **Razon Social**: {local_info['razon_social']} | **RUT**: `{local_info['rut']}`
-- **Direccion**: {local_info['direccion']} - {local_info['ciudad']} - {local_info['region']}
-'''
-st.markdown(multi)
+# Get most recent census clasificacion for the badge
+local_censos = censos_df[censos_df['local_id'] == selected_local_id].sort_values('fecha', ascending=False)
+latest_clasificacion = local_censos.iloc[0]['clasificacion'] if not local_censos.empty else "Sin Datos"
+
+with st.container(border=True):
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown(f"### {local_info['razon_social']}")
+        st.caption(f"ID: {selected_local_id} | RUT: {local_info['rut']}")
+        st.markdown(f"📍 **{local_info['direccion']}**")
+        st.markdown(f"{local_info['ciudad']}, {local_info['region']}")
+        
+    with col2:
+        st.markdown("**Estado de Cumplimiento**")
+        if latest_clasificacion != "Sin Datos":
+            st.badge(latest_clasificacion, icon="🔍")
+        else:
+            st.write("No hay censos registrados")
 
 # -----------------------------------------------------------------------------
 
@@ -89,14 +101,6 @@ with tab2:
     st.altair_chart(salidas_chart, use_container_width=True)
 
 st.subheader("Censos")
-
-
-# Get most recent census clasificacion
-local_censos = censos_df[censos_df['local_id'] == selected_local_id].sort_values('fecha', ascending=False)
-if not local_censos.empty:
-    latest_clasificacion = local_censos.iloc[0]['clasificacion']
-    st.info(f"**Clasificación actual (Censo más reciente):** {latest_clasificacion}")
-    st.badge(latest_clasificacion, icon="🔍")
 
 st.dataframe(censos_df[censos_df['local_id'] == selected_local_id])
 
