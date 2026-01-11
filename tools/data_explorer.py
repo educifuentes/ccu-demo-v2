@@ -22,3 +22,6 @@ st.dataframe(nominas_df)
 
 st.subheader("Activos Data")
 st.dataframe(activos_df)
+
+st.subheader("Contratos Data")
+st.dataframe(contratos_df)

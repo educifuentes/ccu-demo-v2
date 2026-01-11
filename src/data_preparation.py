@@ -56,6 +56,25 @@ def process_censos(censos_df):
     
     return censos_df
 
+def process_contratos(contratos_df):
+    """Processes contratos data to add calculated columns."""
+    # Ensure date columns are datetime objects
+    contratos_df['fecha_fin'] = pd.to_datetime(contratos_df['fecha_fin'])
+    today = pd.Timestamp.today().normalize()
+
+    # vigente: Boolean flag for active contracts.
+    # Assuming 'vigente' column in source is 1 for active.
+    contratos_df['vigente'] = (contratos_df['vigente'] == 1)
+
+    # dias_restantes: Number of days until contract expiration.
+    contratos_df['dias_restantes'] = (contratos_df['fecha_fin'] - today).dt.days
+
+    # proximo_a_vencer: True if contract expires within 30 days and is not yet expired.
+    contratos_df['proximo_a_vencer'] = (contratos_df['dias_restantes'] <= 30) & (contratos_df['dias_restantes'] >= 0)
+
+    return contratos_df
+
+
 def build_activos_trimestres(censos_df: pd.DataFrame,
                                    nominas_df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -133,7 +152,7 @@ def build_activos_trimestres(censos_df: pd.DataFrame,
 
 
 def process_activos(censos_df, nominas_df):
-    """Builds and processes the activos dataframe."""
+    """Builds and processes the activos dataframe tracking totals of salidas and schoperas by local_id and periodo"""
     # Generate the quarterly assets data
     activos_df = build_activos_trimestres(censos_df, nominas_df)
 
@@ -148,6 +167,11 @@ def process_activos(censos_df, nominas_df):
     )
     return activos_df
 
+def build_contratos_from_nominas(contratos_df, nominas_df):
+  
+
+    return contratos_df 
+
 # =============================================================================
 # SECTION: MAIN EXECUTION
 # =============================================================================
@@ -159,6 +183,9 @@ def get_generated_dataframes():
     # 2. Process Census Data
     censos_df = process_censos(censos_df)
     
+    # 3. Process Contratos Data
+    contratos_df = process_contratos(contratos_df)
+
     # 4. Process Assets (Activos) Data
     activos_df = process_activos(censos_df, nominas_df)
 
