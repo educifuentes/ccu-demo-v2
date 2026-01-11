@@ -169,11 +169,11 @@ df_contratos["fecha_fin"] = pd.to_datetime(df_contratos["fecha_fin"], errors='co
 
 # Boolean conversions
 df_contratos["vigente"] = df_contratos["vigente_sn"] == "VIGENTE"
-df_contratos["activo_ccu"] = df_contratos["activo_ccu_sn"] == "Activos"
+df_contratos["reportado_inactivo_ccu"] = df_contratos["activo_ccu_sn"] != "Activos"
 
 # Final selection and types
 df_contratos = df_contratos.astype({"local_id": "string", "folio": "string"})
-df_contratos = df_contratos[["local_id", "fecha_inicio", "fecha_fin", "vigente", "folio", "activo_ccu"]]
+df_contratos = df_contratos[["local_id", "fecha_inicio", "fecha_fin", "vigente", "folio", "reportado_inactivo_ccu"]]
 
 print("\nContratos head:")
 print(df_contratos.head())

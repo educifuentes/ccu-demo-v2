@@ -74,6 +74,61 @@ def process_contratos(contratos_df):
 
     return contratos_df
 
+def contratos_update_from_nominas(contratos_df, nominas_df):
+    """
+    Updates contratos_df with 'reportado_inactivo_ccu', 'motivo_termino' and 'periodo_termino' 
+    based on the latest status from nominas_df.
+    """
+    # Ensure date objects
+    nominas_df = nominas_df.copy()
+    nominas_df['fecha'] = pd.to_datetime(nominas_df['fecha'])
+
+    # Ensure periodo column exists
+    if 'periodo' not in nominas_df.columns:
+        nominas_df['periodo'] = (
+            nominas_df['fecha'].dt.year.astype(str)
+            + "-Q"
+            + nominas_df['fecha'].dt.quarter.astype(str)
+        )
+
+    # Get the latest nomination record for each local_id
+    latest_nominas = (
+        nominas_df.sort_values('fecha', ascending=False)
+        .drop_duplicates('local_id')
+    )
+
+    # Merge this latest info into contratos_df
+    # We include 'periodo' to capture when the 'termino' occurred
+    contratos_df = pd.merge(
+        contratos_df,
+        latest_nominas[['local_id', 'situacion', 'motivo', 'periodo']],
+        on='local_id',
+        how='left'
+    )
+
+    # Apply logic from prompt
+    # reportado_inactivo_ccu: True if latest situacion is 'termino', False otherwise
+    contratos_df['reportado_inactivo_ccu'] = contratos_df['situacion'] == 'termino'
+    
+    # motivo_termino: nominas_df.motivo if situacion is 'termino', NaN otherwise
+    contratos_df['motivo_termino'] = np.where(
+        contratos_df['situacion'] == 'termino',
+        contratos_df['motivo'],
+        np.nan
+    )
+
+    # periodo_termino: nominas_df.periodo if situacion is 'termino', NaN otherwise
+    contratos_df['periodo_termino'] = np.where(
+        contratos_df['situacion'] == 'termino',
+        contratos_df['periodo'],
+        np.nan
+    )
+
+    # Clean up temporary columns from merge
+    contratos_df = contratos_df.drop(columns=['situacion', 'motivo', 'periodo'])
+
+    return contratos_df
+
 
 def build_activos_trimestres(censos_df: pd.DataFrame,
                                    nominas_df: pd.DataFrame) -> pd.DataFrame:
@@ -185,6 +240,7 @@ def get_generated_dataframes():
     
     # 3. Process Contratos Data
     contratos_df = process_contratos(contratos_df)
+    contratos_df = contratos_update_from_nominas(contratos_df, nominas_df)
 
     # 4. Process Assets (Activos) Data
     activos_df = process_activos(censos_df, nominas_df)
