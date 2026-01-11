@@ -33,9 +33,24 @@ def assign_clasificacion(row):
         return "No en regla"
     return "Sin comodato o terminado"
 
+def build_marcas_list(row):
+    """Builds a list of offered brands based on boolean columns."""
+    categorias = []
+    if row.get("marcas_abenv"):
+        categorias.append("ABInBev")
+    if row.get("marcas_kross"):
+        categorias.append("Kross")
+    if row.get("marcas_otras"):
+        categorias.append("Otros")
+    return categorias
+
 # =============================================================================
 # SECTION: DATA PROCESSING
 # =============================================================================
+
+
+
+
 def process_censos(censos_df):
     """Processes censos data to add calculated columns."""
     # applies?: A venue must have more than 3 taps to be considered for compliance.
@@ -53,8 +68,17 @@ def process_censos(censos_df):
 
     # clasificacion: Categorical variable for compliance classification.
     censos_df['clasificacion'] = censos_df.apply(assign_clasificacion, axis=1)
+
+    # marcas
+    censos_df['marcas_abenv'] = censos_df['marcas_abenv'] == 1
+    censos_df['marcas_kross'] = censos_df['marcas_kross'] == 1
+    censos_df['marcas_otras'] = censos_df['marcas_otras'] == 1
+
+    # build marcas column
+    censos_df['marcas'] = censos_df.apply(build_marcas_list, axis=1)
     
     return censos_df
+
 
 def process_contratos(contratos_df):
     """Processes contratos data to add calculated columns."""
