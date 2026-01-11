@@ -4,10 +4,8 @@ import plotly.express as px
 import altair as alt
 from src.data_preparation import get_generated_dataframes
 
-st.title("Reporte de Cumplimiento de Competencia CCU")
-st.subheader("Demo App")
-st.markdown("- 50 locales ficticios de prueba con datos de censos, activos y nominas")
-st.markdown("- Datos de prueba conectado a Google Sheets privado")
+st.title("Cumplimiento de Competencia CCU - Demo App")
+
 
 
 STATUS_COLORS = {
