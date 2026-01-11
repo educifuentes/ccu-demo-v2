@@ -91,12 +91,12 @@ with tab2:
 st.subheader("Censos")
 
 
-# Get most recent census status
+# Get most recent census clasificacion
 local_censos = censos_df[censos_df['local_id'] == selected_local_id].sort_values('fecha', ascending=False)
 if not local_censos.empty:
-    latest_status = local_censos.iloc[0]['status']
-    st.info(f"**Estado actual (Censo más reciente):** {latest_status}")
-st.badge(latest_status, icon="🔍")
+    latest_clasificacion = local_censos.iloc[0]['clasificacion']
+    st.info(f"**Clasificación actual (Censo más reciente):** {latest_clasificacion}")
+    st.badge(latest_clasificacion, icon="🔍")
 
 st.dataframe(censos_df[censos_df['local_id'] == selected_local_id])
 

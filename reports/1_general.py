@@ -6,9 +6,11 @@ from src.data_preparation import get_generated_dataframes
 
 st.title("Cumplimiento de Competencia CCU - Demo App")
 
+st.markdown("Lectura de datos desde [Google Sheets](https://docs.google.com/spreadsheets/d/11JgW2Z9cFrHvNFw21-zlvylTHHo5tvizJeA9oxHcDHU/edit?gid=2068995815#gid=2068995815)")
 
 
-STATUS_COLORS = {
+
+CLASIFICACION_COLORS = {
     "En regla": "#83c9ff", 
     "No en regla": "#ffabab",
     "No aplica": "#CBDCEB",
@@ -32,15 +34,15 @@ censos_df_anual = censos_df[censos_df['periodo'] == selected_periodo]
 
 
 # --- KPIs ---
-st.header("KPIs")
+st.header("Clasificacion")
 
-# Calculate KPIs based on the status of all census records.
-status_counts = censos_df_anual['status'].value_counts()
+# Calculate KPIs based on the clasificacion of all census records.
+clasificacion_counts = censos_df_anual['clasificacion'].value_counts()
 
-en_regla = status_counts.get("En regla", 0)
-no_en_regla = status_counts.get("No en regla", 0)
-sin_comodato = status_counts.get("Sin comodato o terminado", 0)
-no_aplica = status_counts.get("No aplica", 0)
+en_regla = clasificacion_counts.get("En regla", 0)
+no_en_regla = clasificacion_counts.get("No en regla", 0)
+sin_comodato = clasificacion_counts.get("Sin comodato o terminado", 0)
+no_aplica = clasificacion_counts.get("No aplica", 0)
 
 col1, col2, col3 = st.columns([1, 1, 2])
 
@@ -51,14 +53,14 @@ col2.metric("No en Regla", f"{no_en_regla}")
 # col4.metric("No Aplica", f"{no_aplica}")
 
 with col3:
-    # Chart 1 - Pie Chart of Status Distribution
+    # Chart 1 - Pie Chart of Clasificacion Distribution
 
     fig = px.pie(
         censos_df,
-        names='status',
-        color='status',
+        names='clasificacion',
+        color='clasificacion',
         hole=.3,
-        color_discrete_map=STATUS_COLORS,
+        color_discrete_map=CLASIFICACION_COLORS,
         height=300
     )
     fig.update_traces(textinfo='percent+label', pull=[0.05, 0.05, 0.05, 0.05])
@@ -70,14 +72,14 @@ with col3:
 
 
 
-# Chart 2 - Bar Chart of status by date
+# Chart 2 - Bar Chart of clasificacion by date
 st.header("Cumplimiento por Periodo - Censos")
 chart = alt.Chart(censos_df).mark_bar().encode(
     x=alt.X('periodo:O', title='Periodo'),
     y=alt.Y('count():Q', title='Número de Locales'),
     color=alt.Color(
-        'status:N',
-        title='Status',
+        'clasificacion:N',
+        title='Clasificacion',
     )
 )
 
@@ -91,7 +93,7 @@ st.altair_chart(chart, use_container_width=True, height=200)
 
 # subset_columns = [
 #     'local_id', 'periodo', 'salidas_total', 'salidas_ccu',
-#     'salidas_otras', 'salidas_target', 'status'
+#     'salidas_otras', 'salidas_target', 'clasificacion'
 # ]
 # st.dataframe(censos_df[subset_columns])
 

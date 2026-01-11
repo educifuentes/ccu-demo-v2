@@ -4,3 +4,4 @@ z_archive/
 data_scripts/inputs/
 data_scripts/outputs/
 prompts/
+src/__pycache__/

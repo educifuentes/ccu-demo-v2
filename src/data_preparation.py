@@ -21,12 +21,12 @@ def load_data_gsheets():
 # =============================================================================
 # SECTION: HELPER FUNCTIONS
 # =============================================================================
-def assign_status(row):
-    """Assigns compliance status based on rules."""
+def assign_clasificacion(row):
+    """Assigns compliance classification based on rules."""
     if not row['applies?']:
         return "No aplica"
     # The original data does not have a direct way to identify "Sin comodato o terminado"
-    # We are defaulting to the other statuses for now.
+    # We are defaulting to the other classifications for now.
     if row['complies?'] == True:
         return "En regla"
     elif row['complies?'] == False:
@@ -51,8 +51,8 @@ def process_censos(censos_df):
     censos_df['complies?'] = np.nan
     censos_df.loc[censos_df['applies?'] == True, 'complies?'] = (censos_df['salidas_otras'] >= censos_df['salidas_target'])
 
-    # status: Categorical variable for compliance status.
-    censos_df['status'] = censos_df.apply(assign_status, axis=1)
+    # clasificacion: Categorical variable for compliance classification.
+    censos_df['clasificacion'] = censos_df.apply(assign_clasificacion, axis=1)
     
     return censos_df
 
