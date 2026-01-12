@@ -3,3 +3,5 @@ CLASIFICACION_COLORS = {
     "No en regla": "#ffabab",
     "No aplica": "#CBDCEB"
 }
+
+TTL_VALUE = "5m" # 5 minutes 

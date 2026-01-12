@@ -3,7 +3,7 @@ import numpy as np
 import math
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
-
+from utils.config import TTL_VALUE
 
 
 # =============================================================================
@@ -13,7 +13,7 @@ from streamlit_gsheets import GSheetsConnection
 def load_data_gsheets():
     """Return DataFrames for given worksheet names."""
     
-    conn = st.connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection, ttl=TTL_VALUE)
     worksheets = ["locales", "censos", "nominas", "contratos"]
 
     return tuple(conn.read(worksheet=w) for w in worksheets)
