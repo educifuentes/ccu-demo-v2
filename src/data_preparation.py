@@ -10,6 +10,7 @@ from utils.config import TTL_VALUE
 # SECTION: DATA LOADING
 # =============================================================================
 
+@st.cache_data
 def load_data_gsheets():
     """Return DataFrames for given worksheet names."""
     

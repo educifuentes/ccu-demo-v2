@@ -16,5 +16,11 @@ pg = st.navigation({
     "Herramientas": [explore_page, validations_page]
 })
 
+with st.sidebar:
+    st.divider()
+    if st.button("Actualizar Datos 🔄", use_container_width=True, help="Forzar la recarga de datos desde Google Sheets"):
+        st.cache_data.clear()
+        st.rerun()
+
 pg.run()
 
