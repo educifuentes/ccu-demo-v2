@@ -139,3 +139,6 @@ tramo_chart = alt.Chart(activos_plot_df).mark_bar().encode(
 ).properties(height=300)
 
 st.altair_chart(tramo_chart, use_container_width=True)
+
+st.subheader("Otros Posibles Graficos")
+st.markdown("- Estado de contrato por trimestre segun info de nominas.")

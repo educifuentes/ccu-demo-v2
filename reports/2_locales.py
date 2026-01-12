@@ -209,5 +209,3 @@ st.dataframe(local_contrato[contrato_columns], column_config={
     }
 )
 
-st.subheader("Otros Posibles Graficos")
-st.markdown("- Estado de contrato por trimestre segun info de nominas.")
