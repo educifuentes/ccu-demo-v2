@@ -7,9 +7,8 @@ except FileNotFoundError as e:
     st.error(f"Error loading data file: {e}. Please make sure the files are in the 'data/raw/' directory.")
     st.stop()
 
-st.title("Data Explore")
+st.title("Explorador de Datos")
 
-st.markdown("agrear filtrosintearactivos, formaterar oclumnas con colores, etc.")
 
 st.subheader("Locales")
 st.dataframe(locales_df)

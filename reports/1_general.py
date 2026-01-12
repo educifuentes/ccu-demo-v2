@@ -71,8 +71,8 @@ with col1:
     m2.metric("Contratos Vigentes", f"{total_contratos_vigentes}")
     
     m3, m4 = st.columns(2)
-    m3.metric("Sin Comodato", f"{sin_comodato}")
-    m4.metric("No Aplica", f"{no_aplica}")
+    m3.metric("Metrica a definir", f"{sin_comodato}")
+    m4.metric("Metrica a definir", f"{no_aplica}")
 
 with col2:
     fig = plot_clasificacion_pie(censos_df_anual)
