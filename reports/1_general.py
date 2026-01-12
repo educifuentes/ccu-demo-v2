@@ -29,7 +29,7 @@ except FileNotFoundError as e:
 # -----------------------------------------------------------------------------
 
 
-periodos = sorted(censos_df['periodo'].unique())
+periodos = sorted(censos_df['periodo'].unique(), reverse=True)
 selected_periodo = st.selectbox("Seleccionar Periodo", periodos, width=200)
 
 censos_df_anual = censos_df[censos_df['periodo'] == selected_periodo]
