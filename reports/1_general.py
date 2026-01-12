@@ -39,9 +39,10 @@ except FileNotFoundError as e:
 # FILTERS
 # -----------------------------------------------------------------------------
 
+selected_periodo = 2025
 
-periodos = sorted(censos_df['periodo'].unique(), reverse=True)
-selected_periodo = st.selectbox("Seleccionar Periodo", periodos, width=200)
+# periodos = sorted(censos_df['periodo'].unique(), reverse=True)
+# selected_periodo = st.selectbox("Seleccionar Periodo", periodos, width=200)
 
 censos_df_anual = censos_df[censos_df['periodo'] == selected_periodo]
 
@@ -60,23 +61,21 @@ en_regla = clasificacion_counts.get("En regla", 0)
 no_en_regla = clasificacion_counts.get("No en regla", 0)
 sin_comodato = clasificacion_counts.get("Sin comodato o terminado", 0)
 no_aplica = clasificacion_counts.get("No aplica", 0)
-total_locales = censos_df_anual['local_id'].nunique()
+total_locales = censos_df['local_id'].nunique()
 total_contratos_vigentes = contratos_df[contratos_df['vigente'] == True]['local_id'].nunique()
 
-col1, col2 = st.columns([2, 1])
+col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
 with col1:
-    m1, m2 = st.columns(2)
-    m1.metric("Locales", f"{total_locales}")
-    m2.metric("Contratos Vigentes", f"{total_contratos_vigentes}")
-    
-    m3, m4 = st.columns(2)
-    m3.metric("Metrica a definir", f"{sin_comodato}")
-    m4.metric("Metrica a definir", f"{no_aplica}")
-
+    st.metric("Locales", f"{total_locales}")
 with col2:
-    fig = plot_clasificacion_pie(censos_df_anual)
-    st.plotly_chart(fig, use_container_width=True, height=200)
+    st.metric("Contratos Vigentes", f"{total_contratos_vigentes}")
+with col3:  
+    st.metric("Metrica a definir", f"{sin_comodato}")
+with col4:
+    st.metric("Metrica a definir", f"{no_aplica}")
+
+
 
 
 # -----------------------------------------------------------------------------
@@ -109,7 +108,7 @@ st.header("Distribución por Tramo de Salidas - Nominas")
 activos_plot_df = activos_df.copy()
 
 # Filter by selected year (periodo of selectbox)
-activos_plot_df = activos_plot_df[activos_plot_df['fecha'].dt.year == int(selected_periodo)]
+# activos_plot_df = activos_plot_df[activos_plot_df['fecha'].dt.year == int(selected_periodo)]
 
 # Filter for active venues only if needed
 activos_plot_df = activos_plot_df[activos_plot_df['estado'] == 'activo']
@@ -140,5 +139,14 @@ tramo_chart = alt.Chart(activos_plot_df).mark_bar().encode(
 
 st.altair_chart(tramo_chart, use_container_width=True)
 
-st.subheader("Otros Posibles Graficos")
+st.subheader("Metricas posibles")
 st.markdown("- Estado de contrato por trimestre segun info de nominas.")
+st.markdown("- Cuantos locales tomarcon accion cumplimiento?")
+st.markdown("- Cuantos locales no cumplen con el contrato? cual es la brecha de cumplimiento promedio?")
+
+st.subheader("Otros features posibles")
+st.markdown("- Filtro comuna")
+st.markdown("- Filtro por trimestre")
+
+fig = plot_clasificacion_pie(censos_df_anual)
+st.plotly_chart(fig, use_container_width=True, height=200)
