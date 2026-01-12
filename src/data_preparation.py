@@ -66,6 +66,9 @@ def process_censos(censos_df):
     # clasificacion: Categorical variable for compliance classification.
     censos_df['clasificacion'] = censos_df.apply(assign_clasificacion, axis=1)
 
+    # Ensure periodo is a clean string (remove .0 if it became float)
+    censos_df['periodo'] = censos_df['periodo'].astype(str).str.replace(".0", "", regex=False)
+
     # marcas
     censos_df['marcas_abenv'] = censos_df['marcas_abenv'] == 1
     censos_df['marcas_kross'] = censos_df['marcas_kross'] == 1

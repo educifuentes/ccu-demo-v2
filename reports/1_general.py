@@ -24,16 +24,24 @@ except FileNotFoundError as e:
     st.stop()
 
 
-# Filters
-# filter periodo
+# -----------------------------------------------------------------------------
+# FILTERS
+# -----------------------------------------------------------------------------
+
+
 periodos = sorted(censos_df['periodo'].unique())
 selected_periodo = st.selectbox("Seleccionar Periodo", periodos, width=200)
+
 censos_df_anual = censos_df[censos_df['periodo'] == selected_periodo]
 
 
 
 
-# --- KPIs ---
+# -----------------------------------------------------------------------------
+# PANEL METRICAS
+# -----------------------------------------------------------------------------
+
+# --- KMETRICASPIs ---
 st.header("Clasificacion")
 
 # Calculate KPIs based on the clasificacion of all census records.
