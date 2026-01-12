@@ -60,13 +60,15 @@ en_regla = clasificacion_counts.get("En regla", 0)
 no_en_regla = clasificacion_counts.get("No en regla", 0)
 sin_comodato = clasificacion_counts.get("Sin comodato o terminado", 0)
 no_aplica = clasificacion_counts.get("No aplica", 0)
+total_locales = censos_df_anual['local_id'].nunique()
+total_contratos_vigentes = contratos_df[contratos_df['vigente'] == True]['local_id'].nunique()
 
 col1, col2 = st.columns([2, 1])
 
 with col1:
     m1, m2 = st.columns(2)
-    m1.metric("En Regla", f"{en_regla}")
-    m2.metric("No en Regla", f"{no_en_regla}")
+    m1.metric("Locales", f"{total_locales}")
+    m2.metric("Contratos Vigentes", f"{total_contratos_vigentes}")
     
     m3, m4 = st.columns(2)
     m3.metric("Sin Comodato", f"{sin_comodato}")
@@ -101,7 +103,7 @@ st.altair_chart(chart, use_container_width=True, height=200)
 # ACTIVOS - DISTRIBUCION POR TRAMO
 # -----------------------------------------------------------------------------
 
-st.header("Distribución por Tramo de Salidas")
+st.header("Distribución por Tramo de Salidas - Nominas")
 
 # Prepare tramo data
 activos_plot_df = activos_df.copy()
@@ -137,11 +139,3 @@ tramo_chart = alt.Chart(activos_plot_df).mark_bar().encode(
 ).properties(height=300)
 
 st.altair_chart(tramo_chart, use_container_width=True)
-
-
-# -----------------------------------------------------------------------------
-# REVISION DE CUMPLIMIENTO
-# -----------------------------------------------------------------------------
-
-st.subheader("Revision de Cumplimiento")
-st.markdown("Avisa si local necesita revision de cumplimiento segun info de nominas.")

@@ -4,6 +4,19 @@ import altair as alt
 from src.data_preparation import get_generated_dataframes
 from utils.config import CLASIFICACION_COLORS
 
+def display_compliance_badge(clasificacion):
+    """Displays a formatted st.badge based on the classification."""
+    if clasificacion == "En regla":
+        st.badge("En regla", icon="✅")
+    elif clasificacion == "No en regla":
+        st.badge("No en regla", icon="⚠️")
+    elif clasificacion == "No aplica":
+        st.badge("No aplica", icon="⚪")
+    elif clasificacion == "Sin comodato o terminado":
+        st.badge("Sin comodato o terminado", icon="🚫")
+    else:
+        st.badge(clasificacion, icon="🔍")
+
 try:
     locales_df, censos_df, activos_df, nominas_df, contratos_df = get_generated_dataframes()
 except FileNotFoundError as e:
@@ -50,6 +63,7 @@ with col2:
         width=500
     )
 
+local_info = locales_df[locales_df['id'] == selected_local_id].iloc[0]
 
 # -----------------------------------------------------------------------------
 
@@ -58,8 +72,9 @@ with col2:
 # -----------------------------------------------------------------------------
 
 st.subheader("Ficha del Local")
+if pd.notna(local_info['nota_interna']):
+    st.markdown(f"Nota demo: {local_info['nota_interna']}")
 
-local_info = locales_df[locales_df['id'] == selected_local_id].iloc[0]
 
 # Get most recent census clasificacion for the badge
 local_censos = censos_df[censos_df['local_id'] == selected_local_id].sort_values('fecha', ascending=False)
@@ -75,9 +90,9 @@ with st.container(border=True):
         st.markdown(f"{local_info['ciudad']}, {local_info['region']}")
         
     with col2:
-        st.markdown("**Estado de Cumplimiento**")
+        st.markdown("**Estado de Cumplimiento (Ultimo Censo)**")
         if latest_clasificacion != "Sin Datos":
-            st.badge(latest_clasificacion, icon="🔍")
+            display_compliance_badge(latest_clasificacion)
         else:
             st.write("No hay censos registrados")
 
@@ -178,12 +193,21 @@ if not local_contrato.empty:
     if contrato_info['proximo_a_vencer']:
         st.badge(
             icon="⚠️", 
-            label=f"Contrato próximo a vencer ({contrato_info['dias_restantes']} días)", 
-            type="warning"
+            label=f"Contrato próximo a vencer ({contrato_info['dias_restantes']} días)"
         )
 
 contrato_columns = ['fecha_inicio', 'fecha_fin', 'vigente']
-st.dataframe(local_contrato[contrato_columns])
+st.dataframe(local_contrato[contrato_columns], column_config={
+        "fecha_inicio": st.column_config.DateColumn(
+            "Fecha Inicio",
+            help="Fecha de inicio del contrato"
+        ),
+        "fecha_fin": st.column_config.DateColumn(
+            "Fecha Fin",
+            help="Fecha de fin del contrato"    
+        )
+    }
+)
 
-st.subheader("Estado de Contrato por trimestre")
-st.markdown("Estado de contrato por trimestre segun info de nominas.")
+st.subheader("Otros Posibles Graficos")
+st.markdown("- Estado de contrato por trimestre segun info de nominas.")
