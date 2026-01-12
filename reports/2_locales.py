@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from src.data_preparation import get_generated_dataframes
+from utils.config import CLASIFICACION_COLORS
 
 try:
     locales_df, censos_df, activos_df, nominas_df, contratos_df = get_generated_dataframes()
@@ -137,13 +138,8 @@ st.dataframe(
         "clasificacion": st.column_config.MultiselectColumn(
             "Clasificación",
             help="Estado de cumplimiento del local",
-            options=[
-                "En regla",
-                "No en regla",
-                "No aplica",
-                "Sin comodato o terminado",
-            ],
-            color=["#83c9ff", "#ffabab", "#CBDCEB", "#9F8383"],
+            options=list(CLASIFICACION_COLORS.keys()),
+            color=list(CLASIFICACION_COLORS.values()),
         ),
         "marcas": st.column_config.MultiselectColumn(
             "Marcas Ofrecidas",

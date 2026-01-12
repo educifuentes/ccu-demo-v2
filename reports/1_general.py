@@ -3,19 +3,30 @@ import streamlit as st
 import plotly.express as px
 import altair as alt
 from src.data_preparation import get_generated_dataframes
+from utils.config import CLASIFICACION_COLORS
 
 st.title("Cumplimiento de Competencia CCU - Demo App")
 
 st.markdown("Lectura de datos desde [Google Sheets](https://docs.google.com/spreadsheets/d/11JgW2Z9cFrHvNFw21-zlvylTHHo5tvizJeA9oxHcDHU/edit?gid=2068995815#gid=2068995815)")
 
-
-
-CLASIFICACION_COLORS = {
-    "En regla": "#83c9ff", 
-    "No en regla": "#ffabab",
-    "No aplica": "#CBDCEB",
-    "Sin comodato o terminado": "#9F8383"
-}
+def plot_clasificacion_pie(df):
+    """Generates a pie chart for classification distribution."""
+    fig = px.pie(
+        df,
+        names='clasificacion',
+        color='clasificacion',
+        hole=.3,
+        color_discrete_map=CLASIFICACION_COLORS,
+        height=300,
+        custom_data=['clasificacion'] # Optional, but good practice
+    )
+    fig.update_traces(
+        textinfo='percent+label', 
+        pull=[0.05, 0.05, 0.05, 0.05],
+        hovertemplate="<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}"
+    )
+    fig.update_layout(showlegend=False, margin=dict(t=0, b=0, l=0, r=0))
+    return fig
 
 try:
     locales_df, censos_df, activos_df, nominas_df, contratos_df = get_generated_dataframes()
@@ -41,8 +52,6 @@ censos_df_anual = censos_df[censos_df['periodo'] == selected_periodo]
 # PANEL METRICAS
 # -----------------------------------------------------------------------------
 
-# --- KMETRICASPIs ---
-st.header("Clasificacion")
 
 # Calculate KPIs based on the clasificacion of all census records.
 clasificacion_counts = censos_df_anual['clasificacion'].value_counts()
@@ -52,35 +61,26 @@ no_en_regla = clasificacion_counts.get("No en regla", 0)
 sin_comodato = clasificacion_counts.get("Sin comodato o terminado", 0)
 no_aplica = clasificacion_counts.get("No aplica", 0)
 
-col1, col2, col3 = st.columns([1, 1, 2])
+col1, col2 = st.columns([2, 1])
 
-# col1, col2, col3, col4 = st.columns(4)
-col1.metric("En Regla", f"{en_regla}")
-col2.metric("No en Regla", f"{no_en_regla}")
-# col3.metric("Sin Comodato o Terminado", f"{sin_comodato}")
-# col4.metric("No Aplica", f"{no_aplica}")
+with col1:
+    m1, m2 = st.columns(2)
+    m1.metric("En Regla", f"{en_regla}")
+    m2.metric("No en Regla", f"{no_en_regla}")
+    
+    m3, m4 = st.columns(2)
+    m3.metric("Sin Comodato", f"{sin_comodato}")
+    m4.metric("No Aplica", f"{no_aplica}")
 
-with col3:
-    # Chart 1 - Pie Chart of Clasificacion Distribution
-
-    fig = px.pie(
-        censos_df,
-        names='clasificacion',
-        color='clasificacion',
-        hole=.3,
-        color_discrete_map=CLASIFICACION_COLORS,
-        height=300
-    )
-    fig.update_traces(textinfo='percent+label', pull=[0.05, 0.05, 0.05, 0.05])
-    fig.update_layout(showlegend=False)
-    st.plotly_chart(fig, use_container_width=True)
-
-# --- Visualization ---
+with col2:
+    fig = plot_clasificacion_pie(censos_df_anual)
+    st.plotly_chart(fig, use_container_width=True, height=200)
 
 
+# -----------------------------------------------------------------------------
+# CENSOS
+# -----------------------------------------------------------------------------
 
-
-# Chart 2 - Bar Chart of clasificacion by date
 st.header("Cumplimiento por Periodo - Censos")
 chart = alt.Chart(censos_df).mark_bar().encode(
     x=alt.X('periodo:O', title='Periodo'),
@@ -88,26 +88,60 @@ chart = alt.Chart(censos_df).mark_bar().encode(
     color=alt.Color(
         'clasificacion:N',
         title='Clasificacion',
+        scale=alt.Scale(
+            domain=list(CLASIFICACION_COLORS.keys()),
+            range=list(CLASIFICACION_COLORS.values())
+        )
     )
 )
 
 st.altair_chart(chart, use_container_width=True, height=200)
 
+# -----------------------------------------------------------------------------
+# ACTIVOS - DISTRIBUCION POR TRAMO
+# -----------------------------------------------------------------------------
+
+st.header("Distribución por Tramo de Salidas")
+
+# Prepare tramo data
+activos_plot_df = activos_df.copy()
+
+# Filter by selected year (periodo of selectbox)
+activos_plot_df = activos_plot_df[activos_plot_df['fecha'].dt.year == int(selected_periodo)]
+
+# Filter for active venues only if needed
+activos_plot_df = activos_plot_df[activos_plot_df['estado'] == 'activo']
+
+def define_tramo(val):
+    if pd.isna(val): return None
+    return "≤ 3 salidas" if val <= 3 else "≥ 4 salidas"
+
+activos_plot_df['salidas_tramo'] = activos_plot_df['salidas_totales'].apply(define_tramo)
+
+# Create the stacked bar chart
+# Order periods chronologically for the X-axis
+period_order = sorted(activos_plot_df['periodo'].unique())
+
+tramo_chart = alt.Chart(activos_plot_df).mark_bar().encode(
+    x=alt.X('periodo:O', title='Periodo', sort=period_order),
+    y=alt.Y('count():Q', title='Número de Locales'),
+    color=alt.Color(
+        'salidas_tramo:N',
+        title='Tramo de Salidas',
+        scale=alt.Scale(
+            domain=["≤ 3 salidas", "≥ 4 salidas"],
+            range=["#CBDCEB", "#83c9ff"] # Grayish for small, CCU blue for large
+        )
+    ),
+    tooltip=['periodo', 'salidas_tramo', 'count()']
+).properties(height=300)
+
+st.altair_chart(tramo_chart, use_container_width=True)
+
+
+# -----------------------------------------------------------------------------
+# REVISION DE CUMPLIMIENTO
+# -----------------------------------------------------------------------------
+
 st.subheader("Revision de Cumplimiento")
 st.markdown("Avisa si local necesita revision de cumplimiento segun info de nominas.")
-
-
-# # --- Table ---
-
-
-# st.header("Datos de Censos - Salidas")
-
-# subset_columns = [
-#     'local_id', 'periodo', 'salidas_total', 'salidas_ccu',
-#     'salidas_otras', 'salidas_target', 'clasificacion'
-# ]
-# st.dataframe(censos_df[subset_columns])
-
-# st.header("Datos Schoperas - censos")
-# st.text(censos_df.size)
-# st.dataframe(censos_df[['local_id', 'periodo','schoperas_total', 'salidas_total']].sort_values(by=['local_id', 'periodo']))
