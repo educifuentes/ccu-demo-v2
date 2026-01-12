@@ -10,6 +10,11 @@ except FileNotFoundError as e:
     st.stop()
 
 
+
+# -----------------------------------------------------------------------------
+# FILTERS
+# -----------------------------------------------------------------------------
+
 st.title("Locales")
 st.markdown("Informacion de censos y nominas de cada local por periodo")
 
@@ -19,7 +24,6 @@ id_to_name = activos_df.drop_duplicates('local_id').set_index('local_id')['razon
 
 
 col1, col2 = st.columns(2)
-
 
 
 with col1:
@@ -41,11 +45,15 @@ with col2:
     selected_local_id = st.selectbox(
         "Seleccionar Local", 
         filtered_local_ids, 
-        format_func=lambda x: f"{x} - {locales_df_region.loc[locales_df_region['id'] == x, 'razon_social'].values[0]}",
+        format_func=lambda x: f"{int(x)} - {locales_df_region.loc[locales_df_region['id'] == x, 'razon_social'].values[0]}",
         width=500
     )
 
 
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# FICHA DEL LOCAL
 # -----------------------------------------------------------------------------
 
 st.subheader("Ficha del Local")
@@ -61,7 +69,7 @@ with st.container(border=True):
     
     with col1:
         st.markdown(f"### {local_info['razon_social']}")
-        st.caption(f"ID: {selected_local_id} | RUT: {local_info['rut']}")
+        st.caption(f"ID: {int(selected_local_id)} | RUT: {local_info['rut']}")
         st.markdown(f"📍 **{local_info['direccion']}**")
         st.markdown(f"{local_info['ciudad']}, {local_info['region']}")
         
@@ -72,10 +80,15 @@ with st.container(border=True):
         else:
             st.write("No hay censos registrados")
 
+
+# -----------------------------------------------------------------------------
+# ACTIVOS NOMINAS
 # -----------------------------------------------------------------------------
 
 st.subheader("Activos por Trimestre")
 st.markdown("Reconstruido usando censos y nominas CCU. Avisa si local necesita revision de cumplimiento.")
+st.markdown("*Se usa como fuente de verdad los totale sultimo censo registrado antes del periodo de la nomina.")
+
 
 local_stats_df = activos_df[activos_df['local_id'] == selected_local_id].copy()
 # Fill NaN values with 0 to ensure they appear in the chart
@@ -101,16 +114,26 @@ with tab2:
 )
     st.altair_chart(salidas_chart, use_container_width=True)
 
+st.dataframe(local_stats_df[['periodo', 'schoperas_totales', 'salidas_totales']])
+
+
+# -----------------------------------------------------------------------------
+# CENSOS
+# -----------------------------------------------------------------------------
+
 st.subheader("Censos")
 st.markdown("Información detallada de censos por periodo: clasificación de cumplimiento, totales de infraestructura y marcas detectadas.")
 
 censos_filtered = censos_df[censos_df['local_id'] == selected_local_id]
-display_columns = ['periodo', 'clasificacion', 'salidas_total', 'schoperas_total', 'marcas']
+display_columns = ['periodo', 'clasificacion', 'schoperas_total', 'salidas_total', 'salidas_otras', 'marcas', 'accion']
 censos_filtered = censos_filtered[display_columns].sort_values('periodo', ascending=False)
 
 st.dataframe(
     censos_filtered,
     column_config={
+        "schoperas_total": st.column_config.Column("Schoperas", help="Total de schoperas instaladas"),
+        "salidas_total": st.column_config.Column("Salidas", help="Total de salidas instaladas"),
+        "salidas_otras": st.column_config.Column("Salidas Otras", help="Total de salidas instaladas de otras marcas"),
         "clasificacion": st.column_config.MultiselectColumn(
             "Clasificación",
             help="Estado de cumplimiento del local",
@@ -130,12 +153,16 @@ st.dataframe(
                 "Kross",
                 "Otros",
             ],
-            color=["#ffa421", "#803df5", "#00c0f2"],
+            color=["#0C7779", "#803df5", "#00c0f2"],
         ),
     },
     hide_index=True,
 )
 
+
+# -----------------------------------------------------------------------------
+# CONTRATOS
+# -----------------------------------------------------------------------------
 
 st.subheader("Contrato")
 local_contrato = contratos_df[contratos_df['local_id'] == selected_local_id]
@@ -159,4 +186,8 @@ if not local_contrato.empty:
             type="warning"
         )
 
-st.dataframe(local_contrato)
+contrato_columns = ['fecha_inicio', 'fecha_fin', 'vigente']
+st.dataframe(local_contrato[contrato_columns])
+
+st.subheader("Estado de Contrato por trimestre")
+st.markdown("Estado de contrato por trimestre segun info de nominas.")

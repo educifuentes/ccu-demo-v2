@@ -85,6 +85,9 @@ chart = alt.Chart(censos_df).mark_bar().encode(
 
 st.altair_chart(chart, use_container_width=True, height=200)
 
+st.subheader("Revision de Cumplimiento")
+st.markdown("Avisa si local necesita revision de cumplimiento segun info de nominas.")
+
 
 # # --- Table ---
 

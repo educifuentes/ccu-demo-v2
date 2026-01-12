@@ -48,9 +48,6 @@ def build_marcas_list(row):
 # SECTION: DATA PROCESSING
 # =============================================================================
 
-
-
-
 def process_censos(censos_df):
     """Processes censos data to add calculated columns."""
     # applies?: A venue must have more than 3 taps to be considered for compliance.
@@ -73,6 +70,22 @@ def process_censos(censos_df):
     censos_df['marcas_abenv'] = censos_df['marcas_abenv'] == 1
     censos_df['marcas_kross'] = censos_df['marcas_kross'] == 1
     censos_df['marcas_otras'] = censos_df['marcas_otras'] == 1
+
+
+    # disponibilizo & instalo: Boolean flags for actions.
+    censos_df['disponibilizo'] = censos_df['disponibilizo'] == 1
+    censos_df['instalo'] = censos_df['instalo'] == 1
+
+    # accion: Recommendation based on availability and installation status.
+    conditions = [
+        (censos_df['disponibilizo'] & ~censos_df['instalo']),
+        (~censos_df['disponibilizo'] & censos_df['instalo'])
+    ]
+    choices = ['disponibilizo', 'instalo']
+    censos_df['accion'] = np.select(conditions, choices, default=None)
+
+
+
 
     # build marcas column
     censos_df['marcas'] = censos_df.apply(build_marcas_list, axis=1)
