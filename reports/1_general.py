@@ -139,14 +139,14 @@ tramo_chart = alt.Chart(activos_plot_df).mark_bar().encode(
 
 st.altair_chart(tramo_chart, use_container_width=True)
 
-st.subheader("Metricas posibles")
+st.subheader("Features posibles")
 st.markdown("- Estado de contrato por trimestre segun info de nominas.")
 st.markdown("- Cuantos locales tomarcon accion cumplimiento?")
 st.markdown("- Cuantos locales no cumplen con el contrato? cual es la brecha de cumplimiento promedio?")
+st.markdown("- Filtros: comuuna, trimestre, etc..")
+st.markdown("- Tablas con formato customizado con boton de descarga")
+st.markdown("-  agregr URL del contrato drive u a otros doucmentos drive")
 
-st.subheader("Otros features posibles")
-st.markdown("- Filtro comuna")
-st.markdown("- Filtro por trimestre")
 
 fig = plot_clasificacion_pie(censos_df_anual)
 st.plotly_chart(fig, use_container_width=True, height=200)
