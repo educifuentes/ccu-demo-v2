@@ -12,7 +12,7 @@ validations_page = st.Page("tools/validations.py", title="Validaciones", icon=":
 
 # current page
 pg = st.navigation({
-    "Reportes": [general_page, locales_page],
+    "Vistas": [general_page, locales_page],
     "Herramientas": [explore_page, validations_page]
 })
 
