@@ -32,38 +32,11 @@ except FileNotFoundError as e:
 st.title("Locales")
 st.markdown("Informacion de censos y nominas de cada local por periodo")
 
-local_ids = sorted(activos_df['local_id'].unique())
-# Map local_id to razon_social for display
-id_to_name = activos_df.drop_duplicates('local_id').set_index('local_id')['razon_social'].to_dict()
-
-
-col1, col2 = st.columns(2)
-
-
-with col1:
-    regions = ["Todas"] + sorted(locales_df['region'].unique().tolist())
-    selected_region = st.selectbox(
-        "Seleccionar Region", 
-        regions,
-        format_func=lambda x: x.title()
-    )
-    if selected_region == "Todas":
-        locales_df_region = locales_df
-    else:
-        locales_df_region = locales_df[locales_df['region'] == selected_region]
-
-with col2:
-    # Filter local_ids based on the region selection
-    filtered_local_ids = sorted(locales_df_region['id'].unique())
-    # st.write(filtered_local_ids)
-    selected_local_id = st.selectbox(
-        "Seleccionar Local", 
-        filtered_local_ids, 
-        format_func=lambda x: f"{int(x)} - {locales_df_region.loc[locales_df_region['id'] == x, 'razon_social'].values[0]}",
-        width=500
-    )
-
-local_info = locales_df[locales_df['id'] == selected_local_id].iloc[0]
+# Filter selection by razon_social
+names = locales_df['razon_social'].tolist()
+selected_name = st.selectbox("Seleccionar Local", names)
+local_info = locales_df[locales_df['razon_social'] == selected_name].iloc[0]
+selected_local_id = local_info['id']
 
 # -----------------------------------------------------------------------------
 
